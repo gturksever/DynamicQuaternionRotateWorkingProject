@@ -8,14 +8,17 @@ public class CharacterPathFallower : MonoBehaviour
     private Vector3 _startPosition;
     private Vector3 _targetPosition;
     [SerializeField] private float _speed =5f;
-    private float _rotationSpeed = .5f;
+
     private float _distance;
+    private float _maxDistance;
     
 
     private void Start()
     {
         _pathPoints = new List<Transform>(DynamicPathListCreator.pathPoints);
-        _listLenght = _pathPoints.Count;                                      
+        _listLenght = _pathPoints.Count;
+        _maxDistance = Vector3.Distance(_startPosition, _pathPoints[0].transform.position);
+        
     }
 
     private void Update()
@@ -37,8 +40,9 @@ public class CharacterPathFallower : MonoBehaviour
     {
         _distance = CalculateDistance(_startPosition, _targetPosition);
         if (_distance < .1f)
-        {
+        {           
             _listLenghtCounter++;
+           _maxDistance = Vector3.Distance(_startPosition, _pathPoints[_listLenghtCounter].transform.position);
         }
         
     }
@@ -60,10 +64,8 @@ public class CharacterPathFallower : MonoBehaviour
     {
         Quaternion targetRotation = CalculateTargetRotation(_pathPoints[_listLenghtCounter].transform.position - transform.position);
 
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation,_rotationSpeed / Mathf.Clamp01(_distance) * Time.deltaTime); //dynamic rotation
-        
-
-        
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Mathf.Clamp(1,0,_maxDistance/_distance) * Time.deltaTime); //dynamic rotation                                                                                                                                       
+    
     }
 
     private Quaternion CalculateTargetRotation(Vector3 direction)
